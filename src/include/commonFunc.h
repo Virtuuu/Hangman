@@ -19,7 +19,7 @@ using std::vector;
 using std::string;
 
 static SDL_Window* g_window = NULL;
-static SDL_Renderer* g_screen = NULL;
+static SDL_Renderer* gScreen = NULL;
 static SDL_Event g_event;
 static SDL_Event g_eventmore;
 

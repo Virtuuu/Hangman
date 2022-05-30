@@ -4,7 +4,7 @@
 
 hangmanImage::hangmanImage()
 {
-	x_pos = 350;
+	x_pos = 500;
 	y_pos = 255;
 
 	width_sprite = 0;

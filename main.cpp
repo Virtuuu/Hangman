@@ -8,8 +8,8 @@
 #include "Text.h"
 #include "playerPower.h"
 
-baseObject g_background;
-hangmanImage g_player;
+baseObject gBackground;
+hangmanImage gPlayer;
 PlayerPower player_power;
 TTF_Font* fontText = NULL;
 TTF_Font* fontFinish = NULL;
@@ -20,13 +20,14 @@ Mix_Chunk* win = NULL;
 Mix_Chunk* lost = NULL;
 
 
-// khởi tạo window, renderer, mixer, ...
+// initialize all game assets
 bool init();
-// load ảnh
 bool load();
-// tạo vòng lặp cho game
+
+// replay
 int moreGame();
-// tạo menu ban đầu cho game. người chơi chọn level
+
+// choose difficulty
 int chooseFile();
 
 void close();
@@ -34,7 +35,7 @@ void close();
 string chooseWord(int level); 												// returns a random word
 string initGuessWord(string word);
 
-// 
+// check for results & update game state
 bool checkGuessWord(string word, char guess);
 string updateGuessWord(string word, char guess, string guessWord);
 
@@ -43,21 +44,21 @@ int main(int argc, char* argv[])
 	if (!init()) return -1;
 	if (!load()) return -1;
 
-	Mix_PlayMusic(music, 0);
+	Mix_PlayMusic(music, 0); // BGM
 
-	g_player.initSpriteRect();
+	gPlayer.initSpriteRect(); 
 
-	SDL_RenderClear(g_screen);
-	g_background.render(g_screen, NULL);
-	SDL_RenderPresent(g_screen);
+	SDL_RenderClear(gScreen);
+	gBackground.render(gScreen, NULL);
+	SDL_RenderPresent(gScreen);
 	int level = chooseFile();
 	int cnt_die = 0;
 	int point = 0;
-	string str_points = to_string(point);
+	string strPoints = to_string(point);
 
-	bool is_quit = false;
-	if (level == -1) is_quit = true;
-	while (!is_quit)
+	bool isQuit = false;
+	if (level == -1) isQuit = true;
+	while (!isQuit)
 	{
 		srand(time(0));
 
@@ -101,20 +102,20 @@ int main(int argc, char* argv[])
 		strSDL.setText("The Word is: ");
 		wordSDL.setText(word);
 		markNote.setText("POINTS: ");
-		markSDL.setText(str_points);
+		markSDL.setText(strPoints);
 		
 
 
-		note.LoadFromRenderText(fontText, g_screen);
-		noteGuessWord.LoadFromRenderText(fontText, g_screen);
-		noteWrongGuess.LoadFromRenderText(fontText, g_screen);
-		guessWordSDL.LoadFromRenderText(fontText, g_screen);
-		noteWin.LoadFromRenderText(fontText, g_screen);
-		noteLost.LoadFromRenderText(fontText, g_screen);
-		strSDL.LoadFromRenderText(fontText, g_screen);
-		wordSDL.LoadFromRenderText(fontText, g_screen);
-		markNote.LoadFromRenderText(fontText, g_screen);
-		markSDL.LoadFromRenderText(fontText, g_screen);
+		note.LoadFromRenderText(fontText, gScreen);
+		noteGuessWord.LoadFromRenderText(fontText, gScreen);
+		noteWrongGuess.LoadFromRenderText(fontText, gScreen);
+		guessWordSDL.LoadFromRenderText(fontText, gScreen);
+		noteWin.LoadFromRenderText(fontText, gScreen);
+		noteLost.LoadFromRenderText(fontText, gScreen);
+		strSDL.LoadFromRenderText(fontText, gScreen);
+		wordSDL.LoadFromRenderText(fontText, gScreen);
+		markNote.LoadFromRenderText(fontText, gScreen);
+		markSDL.LoadFromRenderText(fontText, gScreen);
 		
 
 		int a = noteGuessWord.getWidth();
@@ -124,24 +125,24 @@ int main(int argc, char* argv[])
 
 		do
 		{
-			SDL_RenderClear(g_screen);
-			g_background.render(g_screen, NULL);
-			player_power.show(g_screen);
-			markNote.renderText(g_screen, 10, 10);
-			markSDL.renderText(g_screen, 10 + markNote.getWidth(), 10);
-			noteGuessWord.renderText(g_screen, screen_width - 550, 300);
-			noteWrongGuess.renderText(g_screen, screen_width - 550, 350);
-			note.renderText(g_screen, screen_width - 550, 400);
-			guessWordSDL.renderText(g_screen, screen_width - 550 + a, 300);
-			wrongWordSDL.renderText(g_screen, screen_width - 550 + b, 350);
-			g_player.show(g_screen, cnt);
-			SDL_RenderPresent(g_screen);
+			SDL_RenderClear(gScreen);
+			gBackground.render(gScreen, NULL);
+			player_power.show(gScreen);
+			markNote.renderText(gScreen, 10, 10);
+			markSDL.renderText(gScreen, 10 + markNote.getWidth(), 10);
+			noteGuessWord.renderText(gScreen, screen_width - 550, 300);
+			noteWrongGuess.renderText(gScreen, screen_width - 550, 350);
+			note.renderText(gScreen, screen_width - 550, 400);
+			guessWordSDL.renderText(gScreen, screen_width - 550 + a, 300);
+			wrongWordSDL.renderText(gScreen, screen_width - 550 + b, 350);
+			gPlayer.show(gScreen, cnt);
+			SDL_RenderPresent(gScreen);
 
 			while (SDL_PollEvent(&g_event) != 0)
 			{
 				if (g_event.type == SDL_QUIT)
 				{
-					is_quit = true;
+					isQuit = true;
 					return 0;
 				}
 				if (g_event.type == SDL_KEYDOWN)
@@ -160,36 +161,36 @@ int main(int argc, char* argv[])
 					guessWordSDL.setText(guessWord);
 					wrongWordSDL.setText(wrongWord);
 
-					guessWordSDL.LoadFromRenderText(fontText, g_screen);
-					wrongWordSDL.LoadFromRenderText(fontText, g_screen);
+					guessWordSDL.LoadFromRenderText(fontText, gScreen);
+					wrongWordSDL.LoadFromRenderText(fontText, gScreen);
 				}
 			}
 
 		} while (guessWord != word && cnt != BAD_GUESS_MAX);
 	
 		
-		if (guessWord == word)
+		if (guessWord == word) // Victory Screen
 		{
-			noteWin.renderText(g_screen, screen_width - 420, 480);
-			strSDL.renderText(g_screen, screen_width - 420, 530);
-			wordSDL.renderText(g_screen, screen_width - 420 + c, 530);
+			noteWin.renderText(gScreen, screen_width - 420, 480);
+			strSDL.renderText(gScreen, screen_width - 420, 530);
+			wordSDL.renderText(gScreen, screen_width - 420 + c, 530);
 			cnt = 0;
-			g_player.show(g_screen, cnt);
+			gPlayer.show(gScreen, cnt);
 			Mix_PauseMusic();
 			Mix_PlayChannel(-1, win, 0);
 			point += 10;
-			str_points = to_string(point);
+			strPoints = to_string(point);
 			
 			SDL_Delay(2000);
 		}
 		
-		else
+		else	// Failed Screen
 		{
-			noteLost.renderText(g_screen, screen_width - 420, 480);
-			strSDL.renderText(g_screen, screen_width - 420, 530);
-			wordSDL.renderText(g_screen, screen_width - 420 + c, 530);
+			noteLost.renderText(gScreen, screen_width - 420, 480);
+			strSDL.renderText(gScreen, screen_width - 420, 530);
+			wordSDL.renderText(gScreen, screen_width - 420 + c, 530);
 			cnt = BAD_GUESS_MAX;
-			g_player.show(g_screen, cnt);
+			gPlayer.show(gScreen, cnt);
 			Mix_PauseMusic();
 			Mix_PlayChannel(-1, lost, 0);
 			SDL_Delay(2000);
@@ -198,24 +199,24 @@ int main(int argc, char* argv[])
 			if (cnt_die == POWER_MAX)
 			{
 				textObject gameOver;
-				SDL_RenderClear(g_screen);
-				g_background.render(g_screen);
+				SDL_RenderClear(gScreen);
+				gBackground.render(gScreen);
 				gameOver.setColor(textObject::BLACK_TEXT);
-				gameOver.setText("GAME OVER!!!");
-				gameOver.LoadFromRenderText(fontHangman, g_screen);
-				gameOver.renderText(g_screen, 140, 260);
-				SDL_RenderPresent(g_screen);
+				gameOver.setText("Game Over!!!");
+				gameOver.LoadFromRenderText(fontHangman, gScreen);
+				gameOver.renderText(gScreen, 140, 260);
+				SDL_RenderPresent(gScreen);
 				SDL_Delay(3000);
-				is_quit = true;
+				isQuit = true;
 
 			}
 			else
 			{
-				SDL_RenderClear(g_screen);
-				g_background.render(g_screen, NULL);
-				SDL_RenderPresent(g_screen);
+				SDL_RenderClear(gScreen);
+				gBackground.render(gScreen, NULL);
+				SDL_RenderPresent(gScreen);
 				int more = moreGame();
-				if (more == 1) is_quit = true;
+				if (more == 1) isQuit = true;
 				player_power.decrease();
 			}
 		}
@@ -232,16 +233,16 @@ bool init()
 	// Render window
 	bool success = true;
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) success = false;
-	g_window = SDL_CreateWindow("Hangman Game!!!",
+	g_window = SDL_CreateWindow("Play Hangman",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
 		screen_width,
 		screen_heigh,
 		SDL_WINDOW_SHOWN);
 	if (g_window == NULL) success = false;
-	g_screen = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED);
-	if (g_screen == NULL) success = false;
-	SDL_SetRenderDrawColor(g_screen, 255, 255, 255, 255);
+	gScreen = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED);
+	if (gScreen == NULL) success = false;
+	SDL_SetRenderDrawColor(gScreen, 255, 255, 255, 255);
 
 	// Fonts
 	if (TTF_Init() < 0) success = false;
@@ -268,9 +269,9 @@ bool init()
 bool load()
 {
 	bool load = true;
-	if (!g_background.loadIMG("image//bg.jpg", g_screen)) load = false;
-	if (!g_player.loadIMG("image//spritehangman.jpeg", g_screen)) load = false;
-	if (!player_power.init("image//heart.png", g_screen)) load = false;
+	if (!gBackground.loadIMG("image//bg.jpg", gScreen)) load = false;
+	if (!gPlayer.loadIMG("image//spritehangman.jpeg", gScreen)) load = false;
+	if (!player_power.init("image//heart.png", gScreen)) load = false;
 	return load;
 }
 
@@ -289,8 +290,8 @@ int moreGame()
 	moreGameInfor[1].setColor(textObject::BLACK_TEXT);
 	moreGameInfor[0].setText("RETRY");
 	moreGameInfor[1].setText("EXIT");
-	moreGameInfor[0].LoadFromRenderText(fontFinish, g_screen);
-	moreGameInfor[1].LoadFromRenderText(fontFinish, g_screen);
+	moreGameInfor[0].LoadFromRenderText(fontFinish, gScreen);
+	moreGameInfor[1].LoadFromRenderText(fontFinish, gScreen);
 
 	bool selected[2] = { 0, 0 };
 
@@ -306,8 +307,8 @@ int moreGame()
 	SDL_Event m_event;
 	while (true)
 	{
-		moreGameInfor[0].renderText(g_screen, pos[0].x, pos[0].y);
-		moreGameInfor[1].renderText(g_screen, pos[1].x, pos[1].y);
+		moreGameInfor[0].renderText(gScreen, pos[0].x, pos[0].y);
+		moreGameInfor[1].renderText(gScreen, pos[1].x, pos[1].y);
 
 		while (SDL_PollEvent(&m_event))
 		{
@@ -339,7 +340,7 @@ int moreGame()
 							moreGameInfor[i].setColor(textObject::BLACK_TEXT);
 						}
 					}
-					moreGameInfor[i].LoadFromRenderText(fontFinish, g_screen);
+					moreGameInfor[i].LoadFromRenderText(fontFinish, gScreen);
 				}
 				break;
 			}
@@ -365,7 +366,7 @@ int moreGame()
 				break;
 			}
 		}
-		SDL_RenderPresent(g_screen);
+		SDL_RenderPresent(gScreen);
 	}
 	return 1;
 }
@@ -388,24 +389,24 @@ int chooseFile()
 	textObject level[3];
 
 	chooseLevel.setColor(textObject::BLACK_TEXT);
-	chooseLevel.setText("Choose Level");
-	chooseLevel.LoadFromRenderText(fontLevel, g_screen);
+	chooseLevel.setText("Choose Level: ");
+	chooseLevel.LoadFromRenderText(fontLevel, gScreen);
 
 	hangman.setColor(textObject::BLACK_TEXT);
 	hangman.setText("HANGMAN");
-	hangman.LoadFromRenderText(fontHangman, g_screen);
+	hangman.LoadFromRenderText(fontHangman, gScreen);
 
 	level[0].setColor(textObject::BLACK_TEXT);
 	level[0].setText("Easy");
-	level[0].LoadFromRenderText(fontLevel, g_screen);
+	level[0].LoadFromRenderText(fontLevel, gScreen);
 
 	level[1].setColor(textObject::BLACK_TEXT);
 	level[1].setText("Medium");
-	level[1].LoadFromRenderText(fontLevel, g_screen);
+	level[1].LoadFromRenderText(fontLevel, gScreen);
 
 	level[2].setColor(textObject::BLACK_TEXT);
 	level[2].setText("Hard");
-	level[2].LoadFromRenderText(fontLevel, g_screen);
+	level[2].LoadFromRenderText(fontLevel, gScreen);
 
 	bool selected[3] = { 0, 0, 0 };
 	int width_[3], height_[3];
@@ -420,11 +421,11 @@ int chooseFile()
 	SDL_Event m_event;
 	while (true)
 	{
-		hangman.renderText(g_screen, 180, 260);
-		chooseLevel.renderText(g_screen, 100, 400);
+		hangman.renderText(gScreen, 180, 260);
+		chooseLevel.renderText(gScreen, 100, 400);
 		for (int i = 0; i < 3; i++)
 		{
-			level[i].renderText(g_screen, pos[i].x, pos[i].y);
+			level[i].renderText(gScreen, pos[i].x, pos[i].y);
 		}
 		while (SDL_PollEvent(&m_event))
 		{
@@ -455,7 +456,7 @@ int chooseFile()
 							level[i].setColor(textObject::BLACK_TEXT);
 						}
 					}
-					level[i].LoadFromRenderText(fontLevel, g_screen);
+					level[i].LoadFromRenderText(fontLevel, gScreen);
 				}
 				break;
 			}
@@ -479,7 +480,7 @@ int chooseFile()
 				break;
 			}
 		}
-		SDL_RenderPresent(g_screen);
+		SDL_RenderPresent(gScreen);
 	}
 	return -1;
 }
@@ -489,8 +490,8 @@ void close()
 	Mix_CloseAudio();
 	SDL_DestroyWindow(g_window);
 	g_window = NULL;
-	SDL_DestroyRenderer(g_screen);
-	g_screen = NULL;
+	SDL_DestroyRenderer(gScreen);
+	gScreen = NULL;
 
 	IMG_Quit();
 	SDL_Quit();
